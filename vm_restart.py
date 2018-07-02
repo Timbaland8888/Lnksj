@@ -57,35 +57,37 @@ except ValueError:
 # 关闭游标和mysql数据库连接
 cursor.close()
 db.close()
-#获取当前时间
-now_date = datetime.datetime.now().strftime('%H:%M')
-# print now_date
-# cure_date = datetime.datetime.strptime(now_date,'%Y-%m-%d %H:%M:%S')
-# print now_date
-#自定义重启时间
-set_retime = ['01:30','01:31']
-conn = connect(host=host[1])
-while True:
-    now_date = datetime.datetime.now().strftime('%H:%M:%S')
-    #判断星期六星期天不重启时间：0、6
-    week = time.strftime("%w", time.localtime())
-    if datetime.datetime.now().strftime('%H:%M') in set_retime:
-        # if datetime.datetime.now().strftime('%H:%M') in set_retime and week not in [0, 6]:
+if __name__ == '__main__':
 
-        #批量重启虚拟机
-        for vm_id in range(0,vm_count,1):
-            # cmd = 'xe vm-shutdown force=true name-label=%s' % (vm_name[vm_id])
-            recmd ='xe vm-reboot force=true name-label=%s' %(vm_name[vm_id])
-            scmd = 'xe vm-start force=true name-label=%s' % (vm_name[vm_id])
-            result=exec_commands(connect(host=host[0]), cmd=recmd)
-            if re.findall(r"halted",result,re.M|re.I):
-                exec_commands(conn, cmd=scmd)
-                print unicode('{0}的{1}正在开机，请等待注册\n'.format(vm_room[vm_id].encode('utf-8'), vm_name[vm_id].encode('utf-8')),'utf-8')
-                continue
-            print unicode('现在正在重启{0}的{1}请等待注册\n'.format(vm_room[vm_id].encode('utf-8'),vm_name[vm_id].encode('utf-8')),'utf-8')
-            time.sleep(10)
-    else:
-        print  unicode('现在时间：{0}，还未到重启时间{1}，请等待\n'.format(now_date.encode('utf-8'),\
-                set_retime[0].encode('utf-8'), set_retime[1].encode('utf-8')),'utf-8')
-        time.sleep(15)
+    #获取当前时间
+    now_date = datetime.datetime.now().strftime('%H:%M')
+    # print now_date
+    # cure_date = datetime.datetime.strptime(now_date,'%Y-%m-%d %H:%M:%S')
+    # print now_date
+    #自定义重启时间
+    set_retime = ['01:30','01:31']
+    conn = connect(host=host[1])
+    while True:
+        now_date = datetime.datetime.now().strftime('%H:%M:%S')
+        #判断星期六星期天不重启时间：0、6
+        week = time.strftime("%w", time.localtime())
+        if datetime.datetime.now().strftime('%H:%M') in set_retime:
+            # if datetime.datetime.now().strftime('%H:%M') in set_retime and week not in [0, 6]:
+
+            #批量重启虚拟机
+            for vm_id in range(0,vm_count,1):
+                # cmd = 'xe vm-shutdown force=true name-label=%s' % (vm_name[vm_id])
+                recmd ='xe vm-reboot force=true name-label=%s' %(vm_name[vm_id])
+                scmd = 'xe vm-start force=true name-label=%s' % (vm_name[vm_id])
+                result=exec_commands(connect(host=host[0]), cmd=recmd)
+                if re.findall(r"halted",result,re.M|re.I):
+                    exec_commands(conn, cmd=scmd)
+                    print unicode('{0}的{1}正在开机，请等待注册\n'.format(vm_room[vm_id].encode('utf-8'), vm_name[vm_id].encode('utf-8')),'utf-8')
+                    continue
+                print unicode('现在正在重启{0}的{1}请等待注册\n'.format(vm_room[vm_id].encode('utf-8'),vm_name[vm_id].encode('utf-8')),'utf-8')
+                time.sleep(10)
+        else:
+            print  unicode('现在时间：{0}，还未到重启时间{1}，请等待\n'.format(now_date.encode('utf-8'),\
+                    set_retime[0].encode('utf-8'), set_retime[1].encode('utf-8')),'utf-8')
+            time.sleep(15)
         print unicode('A、B、C、D教室云桌面数量共{0}台'.format(vm_count),'utf-8')
