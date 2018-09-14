@@ -22,20 +22,20 @@ class IPV4(object):
         current_time = time.strftime('%Y%m%d-%H:%M:%S', time.localtime())
         ip_list = []
         #1、无法访问目标主机 2、请求超时
-        if re.findall(r'无法访问目标主机',result[1]) == ['无法访问目标主机', '无法访问目标主机']:
+        if re.findall(r'无法访问目标主机',result[1]) == [r'无法访问目标主机', r'无法访问目标主机'] or re.findall(r'请求超时',result[1]) == [ r'请求超时',r'请求超时']:
             # print('时间:{} ip地址:{} ping fail'.format(current_time, ipaddr))
             status = '时间:{} ip地址:{} ping fail'.format(current_time, ipaddr)
 
         else:
             print('时间:{} ip地址:{} ping ok'.format(current_time, ipaddr))
             status = '时间:{} ip地址:{} ping ok'.format(current_time, ipaddr)
-            ip_list.append(ipaddr)
-            return ip_list
+
+            return ipaddr
         fnull.close()
 
     def asynchronous(self,ping_call): # 异步
 
-        g_l = [gevent.spawn(ping_call, i) for i in range(45, 47)]
+        g_l = [gevent.spawn(ping_call, i) for i in range(1, 256)]
 
         gevent.joinall(g_l)
 
@@ -59,6 +59,8 @@ class IPV4(object):
             log.write(('%s %s call  Failed!\r\n') % (host, e))
             log.close()
             return False
+        finally:
+            print('continue')
 if __name__ == '__main__':
     start_time = time.time()
     mask = '255.255.255.0'
@@ -71,8 +73,12 @@ if __name__ == '__main__':
     p = IPV4('192.168.0.')
     p.asynchronous(p.ping_call)
     #获取IP集合
-    m_ip = p.ping_call(46)
-    print(type(m_ip))
-    p.call_remote_bat(m_ip[0],user,pwd,mask,gateway,dns)
+    m_ip = []
+    for ip in range(1,256):
+        if p.ping_call(ip) is not None:
+            m_ip.append(p.ping_call(ip))
+
+    print(m_ip)
+    # p.call_remote_bat(m_ip[0],user,pwd,mask,gateway,dns)
 
     print('协程执行-->耗时{:.2f}'.format(time.time() - start_time))
