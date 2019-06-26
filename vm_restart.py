@@ -6,6 +6,7 @@
 # from dateutil import parser
 import MySQLdb,sys, os,time,datetime,re
 from vm_tool import connect,exec_commands
+import winrm
 import logging
 logging.basicConfig(level = logging.INFO,format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -17,6 +18,7 @@ password = '123456'
 dbname = 'hj21_backend'
 port = 3306
 charset = 'utf8'
+
 db = MySQLdb.connect(host=ip, user=user, passwd=password, db=dbname, port=port, charset=charset)
 cursor = db.cursor()
 vm_name = []
@@ -38,7 +40,7 @@ try:
     result = cursor.fetchall()
     # 获取教室云桌面数量
     vm_count = len(result)
-    print unicode('A、B、C、D教室云桌面数量共{0}台'.format(vm_count),'utf-8')
+    print unicode('A、B、C、D、E 教室云桌面数量共{0}台'.format(vm_count),'utf-8')
     # print len(cursor.fetchall())
     # cursor.execute(query_vm)
     for vm_id in range(0,vm_count,1):
@@ -65,8 +67,8 @@ if __name__ == '__main__':
     # cure_date = datetime.datetime.strptime(now_date,'%Y-%m-%d %H:%M:%S')
     # print now_date
     #自定义重启时间
-    set_retime = ['01:30','01:31']
-    conn = connect(host=host[1])
+    set_retime = ['01:30','01:31','12:00']
+    conn = connect(host=host[2])
     while True:
         now_date = datetime.datetime.now().strftime('%H:%M:%S')
         #判断星期六星期天不重启时间：0、6
@@ -86,8 +88,25 @@ if __name__ == '__main__':
                     continue
                 print unicode('现在正在重启{0}的{1}请等待注册\n'.format(vm_room[vm_id].encode('utf-8'),vm_name[vm_id].encode('utf-8')),'utf-8')
                 time.sleep(10)
+            p = winrm.Session('http://172.25.1.33:5985/wsman', auth=('administrator', '1qaz@WSX'))
+            for vm_id in range(0, vm_count, 1):
+                filename = vm_name[vm_id].split('-V')[0]
+                # print filename
+                try:
+
+                    p.run_cmd('del /F /S /Q  D:\%s\* '% (filename))
+                except Exception,e:
+                    print e
+                finally:
+                    print filename
+
+            print p.run_cmd(r'del /S /Q  D:\teacher\1403\* ')
+            print p.run_cmd(r'del /S /Q  D:\teacher\1404\* ')
+            print p.run_cmd(r'del /S /Q  D:\teacher\1405\* ')
+            print p.run_cmd(r'del /S /Q  D:\teacher\1406\* ')
+            print p.run_cmd(r'del /S /Q  D:\teacher\1407\* ')
         else:
-            print  unicode('现在时间：{0}，还未到重启时间{1}，请等待\n'.format(now_date.encode('utf-8'),\
-                    set_retime[0].encode('utf-8'), set_retime[1].encode('utf-8')),'utf-8')
+            print  unicode('现在时间：{0}，还未到重启时间{1} {2}，请等待\n'.format(now_date.encode('utf-8'),\
+                    set_retime[0].encode('utf-8'), set_retime[2].encode('utf-8')),'utf-8')
             time.sleep(15)
-        print unicode('A、B、C、D教室云桌面数量共{0}台'.format(vm_count),'utf-8')
+        print unicode('A、B、C、D、E  教室云桌面数量共{0}台'.format(vm_count),'utf-8')

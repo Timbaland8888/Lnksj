@@ -22,7 +22,7 @@ vm_room = []
 query_vm = '''SELECT vm.vm_name,dg.dg_name
 from hj_vm vm 
 INNER JOIN hj_dg dg on dg.id = vm.dg_id
-WHERE dg.dg_name = 'c403' and vm.del_flag= 0 and vm.vm_type=1
+WHERE dg.dg_name = 'c407' and vm.del_flag= 0 and vm.vm_type=1
 '''
 try:
     cursor.execute(query_vm)
@@ -50,7 +50,7 @@ cursor.close()
 db.close()
 for vm_id in range(0,vm_count,1):
 
-    win7 = winrm.Session('http://%s.lnxdjx.com:5985/wsman'%(vm_name[vm_id]),auth=('administrator','1qaz@WSX'))
+    win7 = winrm.Session('http://%s.lnxdjx.com:5985/wsman'%('JSWIN7-290'),auth=('administrator','1qaz@WSX'))
     print ('%s is  delete'%(vm_name[vm_id]))
     # print (win7.run_cmd('dir e:\\').std_out)
     print (win7.run_cmd('del /F /S /Q E:\\*').std_out)
